@@ -11,5 +11,5 @@ mkdir -p $WORK_DIR
 #python tools/train.py ${CONFIG_FILE} --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH} model.backbone.use_checkpoint=True
 
 # multi gpu
-python tools/train.py ${CONFIG_FILE} --gpus $NUM_GPUS --launcher pytorch --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH} model.backbone.use_checkpoint=True
+bash tools/dist_train.sh ${CONFIG_FILE} $NUM_GPUS --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH} model.backbone.use_checkpoint=True
 
