@@ -29,16 +29,16 @@ do
   do
     if [ "$key_inner" = "$keyword" ]; then
         # scene A's train+val now becomes scene A's val
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/train/* ACDC_nouveau/$keyword/leftImg8bit/val
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/val/* ACDC_nouveau/$keyword/leftImg8bit/val
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/gtFine/train/* ACDC_nouveau/$keyword/gtFine/val
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/gtFine/val/* ACDC_nouveau/$keyword/gtFine/val
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/train/* ACDC_nouveau/$keyword/leftImg8bit/val
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/val/* ACDC_nouveau/$keyword/leftImg8bit/val
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/gtFine/train/* ACDC_nouveau/$keyword/gtFine/val
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/gtFine/val/* ACDC_nouveau/$keyword/gtFine/val
     else
         # scene non-A's train+val now becomes scene A's train
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/train/* ACDC_nouveau/$keyword/leftImg8bit/train
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/val/* ACDC_nouveau/$keyword/leftImg8bit/train
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/gtFine/train/* ACDC_nouveau/$keyword/gtFine/train
-        ln -sf $ACDC_VANILLA_PATH/$key_inner/gtFine/val/* ACDC_nouveau/$keyword/gtFine/train
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/train/* ACDC_nouveau/$keyword/leftImg8bit/train
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/leftImg8bit/val/* ACDC_nouveau/$keyword/leftImg8bit/train
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/gtFine/train/* ACDC_nouveau/$keyword/gtFine/train
+        cp -L -srf $ACDC_VANILLA_PATH/$key_inner/gtFine/val/* ACDC_nouveau/$keyword/gtFine/train
     fi
   done
 
