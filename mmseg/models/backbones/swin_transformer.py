@@ -4,6 +4,7 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ze Liu, Yutong Lin, Yixuan Wei
 # --------------------------------------------------------
+import random
 
 import torch
 import torch.nn as nn
@@ -173,7 +174,7 @@ class SwinTransformerBlock(nn.Module):
 
     def __init__(self, dim, num_heads, window_size=7, shift_size=0,
                  mlp_ratio=4., qkv_bias=True, qk_scale=None, drop=0., attn_drop=0., drop_path=0.,
-                 act_layer=nn.GELU, norm_layer=nn.LayerNorm):
+                 act_layer=nn.GELU, norm_layer=nn.LayerNorm, mix_style=False):
         super().__init__()
         self.dim = dim
         self.num_heads = num_heads
@@ -182,7 +183,11 @@ class SwinTransformerBlock(nn.Module):
         self.mlp_ratio = mlp_ratio
         assert 0 <= self.shift_size < self.window_size, "shift_size must in 0-window_size"
 
-        self.norm1 = norm_layer(dim)
+        self.mix_style = mix_style
+        if self.mix_style:
+            self.style_mixer = StyleMixer()
+        else:
+            self.norm1 = norm_layer(dim)
         self.attn = WindowAttention(
             dim, window_size=to_2tuple(self.window_size), num_heads=num_heads,
             qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
@@ -207,8 +212,12 @@ class SwinTransformerBlock(nn.Module):
         H, W = self.H, self.W
         assert L == H * W, "input feature has wrong size"
 
-        shortcut = x
-        x = self.norm1(x)
+        if not self.mix_style:
+            shortcut = x
+            x = self.norm1(x)
+        else:
+            x = self.style_mixer(x)
+            shortcut = x
         x = x.view(B, H, W, C)
 
         # pad feature maps to multiples of window size
@@ -330,12 +339,14 @@ class BasicLayer(nn.Module):
                  drop_path=0.,
                  norm_layer=nn.LayerNorm,
                  downsample=None,
-                 use_checkpoint=False):
+                 use_checkpoint=False,
+                 mix_style=False):
         super().__init__()
         self.window_size = window_size
         self.shift_size = window_size // 2
         self.depth = depth
         self.use_checkpoint = use_checkpoint
+        self.mix_style = mix_style
 
         # build blocks
         self.blocks = nn.ModuleList([
@@ -350,7 +361,8 @@ class BasicLayer(nn.Module):
                 drop=drop,
                 attn_drop=attn_drop,
                 drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path,
-                norm_layer=norm_layer)
+                norm_layer=norm_layer,
+                mix_style=True if self.mix_style and i == 0 else False)
             for i in range(depth)])
 
         # patch merging layer
@@ -540,7 +552,9 @@ class SwinTransformer(nn.Module):
                 drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
                 norm_layer=norm_layer,
                 downsample=PatchMerging if (i_layer < self.num_layers - 1) else None,
-                use_checkpoint=use_checkpoint)
+                use_checkpoint=use_checkpoint,
+                mix_style=True if i_layer in [1, 2] else False  # apply mix style to first two layers' output
+            )
             self.layers.append(layer)
 
         num_features = [int(embed_dim * 2 ** i) for i in range(self.num_layers)]
@@ -628,3 +642,43 @@ class SwinTransformer(nn.Module):
         """Convert the model into training mode while keep layers freezed."""
         super(SwinTransformer, self).train(mode)
         self._freeze_stages()
+
+
+class StyleMixer(nn.Module):
+    def __init__(self, alpha=0.1, prob=0.5, eps=1e-6):
+        super().__init__()
+        self.beta = torch.distributions.Beta(alpha, alpha)
+        self.prob = prob
+        self.eps = eps
+
+    def forward(self, x):
+        """
+
+        Args:
+            x: shape B, L (H*W), C
+
+        Returns:
+
+        """
+        # TODO: maybe mix styles of each patch?
+        print("Premix!")
+        if not self.training or random.random() > self.prob:
+            return x
+        print("Mix!")
+        B, L, C = x.shape
+        x = x.transpose(1, 2)  # B, C, L
+        mu = x.mean(dim=2, keepdim=True)  # compute instance mean
+        var = x.var(dim=2, keepdim=True)  # compute instance variance
+
+        sig = (var + self.eps).sqrt()  # compute instance standard deviation
+        mu, sig = mu.detach(), sig.detach()  # block gradients
+        x_normed = (x - mu) / sig  # normalize input
+
+        lmda = self.beta.sample((x.shape[0], 1, 1)).to(x.device)  # sample instance-wise convex weights
+
+        perm = torch.randperm(B)  # generate shuffling indices
+        mu2, sig2 = mu[perm], sig[perm]  # shuffling
+        mu_mix = mu * lmda + mu2 * (1 - lmda)  # generate mixed mean
+        sig_mix = sig * lmda + sig2 * (1 - lmda)  # generate mixed standard deviation
+
+        return (x_normed * sig_mix + mu_mix).transpose(1, 2)  # denormalize input using the mixed statistics
