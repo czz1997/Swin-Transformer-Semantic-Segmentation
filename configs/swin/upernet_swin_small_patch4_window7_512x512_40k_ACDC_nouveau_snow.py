@@ -1,6 +1,6 @@
 _base_ = [
-    '../_base_/models/upernet_swin.py', '../_base_/datasets/acdc_nouveau_night.py',
-    '../_base_/default_runtime.py', '../_base_/schedules/schedule_80k.py'
+    '../_base_/models/upernet_swin.py', '../_base_/datasets/acdc_nouveau_snow.py',
+    '../_base_/default_runtime.py', '../_base_/schedules/schedule_40k.py'
 ]
 model = dict(
     backbone=dict(
