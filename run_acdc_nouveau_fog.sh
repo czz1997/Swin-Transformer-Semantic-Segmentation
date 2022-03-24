@@ -1,6 +1,5 @@
 export EXP_NAME="ACDC_nouveau_fog"
-#export CONFIG_FILE="configs/swin/upernet_swin_small_patch4_window7_512x512_20k_ACDC.py"
-export CONFIG_FILE="configs/swin/upernet_swin_small_patch4_window7_512x512_80k_ACDC_nouveau_fog.py"
+export CONFIG_FILE="configs/swin/upernet_swin_small_patch4_window7_512x512_80k_$EXP_NAME.py"
 export PRETRAINED_MODEL_PATH="weights/swin_small_patch4_window7_224.pth"
 export WORK_DIR="runs/${EXP_NAME}"
 export NUM_GPUS=2
