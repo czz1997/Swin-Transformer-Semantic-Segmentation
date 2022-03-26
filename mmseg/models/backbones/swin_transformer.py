@@ -660,13 +660,10 @@ class StyleMixer(nn.Module):
         Returns:
 
         """
-        # TODO: maybe mix styles of each patch?
-        print("Premix!")
         if not self.training or random.random() > self.prob:
             return x
-        print("Mix!")
-        B, L, C = x.shape
-        x = x.transpose(1, 2)  # B, C, L
+        B, L, C = x.shape  # C is a patch!
+        # x = x.transpose(1, 2)  # B, C, L
         mu = x.mean(dim=2, keepdim=True)  # compute instance mean
         var = x.var(dim=2, keepdim=True)  # compute instance variance
 
@@ -676,9 +673,9 @@ class StyleMixer(nn.Module):
 
         lmda = self.beta.sample((x.shape[0], 1, 1)).to(x.device)  # sample instance-wise convex weights
 
-        perm = torch.randperm(B)  # generate shuffling indices
-        mu2, sig2 = mu[perm], sig[perm]  # shuffling
+        perm = torch.randperm(B * L)  # generate shuffling indices
+        mu2, sig2 = mu.flatten()[perm].view(B, L, 1), sig.flatten()[perm].view(B, L, 1)  # shuffling
         mu_mix = mu * lmda + mu2 * (1 - lmda)  # generate mixed mean
         sig_mix = sig * lmda + sig2 * (1 - lmda)  # generate mixed standard deviation
 
-        return (x_normed * sig_mix + mu_mix).transpose(1, 2)  # denormalize input using the mixed statistics
+        return x_normed * sig_mix + mu_mix  # denormalize input using the mixed statistics
