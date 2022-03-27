@@ -671,7 +671,7 @@ class StyleMixer(nn.Module):
         mu, sig = mu.detach(), sig.detach()  # block gradients
         x_normed = (x - mu) / sig  # normalize input
 
-        lmda = self.beta.sample((x.shape[0], 1, 1)).to(x.device)  # sample instance-wise convex weights
+        lmda = self.beta.sample((B, L, 1)).to(x.device)  # sample patch-wise convex weights
 
         perm = torch.randperm(B * L)  # generate shuffling indices
         mu2, sig2 = mu.flatten()[perm].view(B, L, 1), sig.flatten()[perm].view(B, L, 1)  # shuffling
