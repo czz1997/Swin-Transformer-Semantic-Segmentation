@@ -21,8 +21,8 @@ export NUM_GPUS=2
 mkdir -p $WORK_DIR
 
 # single gpu
-#python tools/train.py ${CONFIG_FILE} --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH} model.backbone.use_checkpoint=True
+#python tools/train.py ${CONFIG_FILE} --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH}
 
 # multi gpu
-bash tools/dist_train.sh ${CONFIG_FILE} $NUM_GPUS --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH} model.backbone.use_checkpoint=True
+bash tools/dist_train.sh ${CONFIG_FILE} $NUM_GPUS --work-dir ${WORK_DIR} --options model.pretrained=${PRETRAINED_MODEL_PATH}
 
