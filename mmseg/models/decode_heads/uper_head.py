@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from mmcv.cnn import ConvModule
 
 from mmseg.ops import resize
@@ -73,6 +74,24 @@ class UPerHead(BaseDecodeHead):
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
 
+        self.proj_head = nn.Sequential(
+                ConvModule(
+                    self.channels,
+                    self.channels,
+                    1,
+                    conv_cfg=self.conv_cfg,
+                    norm_cfg=self.norm_cfg
+                ),
+                ConvModule(
+                    self.channels,
+                    256,
+                    1,
+                    conv_cfg=self.conv_cfg,
+                    norm_cfg=None,
+                    act_cfg=None
+                )
+            )
+
     def psp_forward(self, inputs):
         """Forward function of PSP module."""
         x = inputs[-1]
@@ -94,7 +113,7 @@ class UPerHead(BaseDecodeHead):
             for i, lateral_conv in enumerate(self.lateral_convs)
         ]
 
-        laterals.append(self.psp_forward(inputs))
+        laterals.append(self.psp_forward(inputs))  # RPM head
 
         # build top-down path
         used_backbone_levels = len(laterals)
@@ -106,7 +125,7 @@ class UPerHead(BaseDecodeHead):
                 mode='bilinear',
                 align_corners=self.align_corners)
 
-        # build outputs
+        # build outputs (FPN)
         fpn_outs = [
             self.fpn_convs[i](laterals[i])
             for i in range(used_backbone_levels - 1)
@@ -120,7 +139,10 @@ class UPerHead(BaseDecodeHead):
                 size=fpn_outs[0].shape[2:],
                 mode='bilinear',
                 align_corners=self.align_corners)
-        fpn_outs = torch.cat(fpn_outs, dim=1)
-        output = self.fpn_bottleneck(fpn_outs)
-        output = self.cls_seg(output)
-        return output
+        fpn_outs = torch.cat(fpn_outs, dim=1)  # fused feature map
+        output = self.fpn_bottleneck(fpn_outs)  # [N, C, H, W]
+        logits = self.cls_seg(output)  # [N, cls, H, W]
+        if not self.training:
+            return logits
+        embed = F.normalize(self.proj_head(output), p=2, dim=1)  # L2 normalized
+        return logits, embed
