@@ -1,6 +1,6 @@
 _base_ = [
     '../_base_/models/upernet_swin.py', '../_base_/datasets/cityscapes.py',
-    '../_base_/default_runtime.py', '../_base_/schedules/schedule_40k.py'
+    '../_base_/default_runtime.py', '../_base_/schedules/schedule_60k.py'
 ]
 model = dict(
     backbone=dict(  # override certain base configs of upernet-swin
