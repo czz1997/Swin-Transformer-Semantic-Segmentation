@@ -137,7 +137,7 @@ def mask_cross_entropy(pred,
 
 @LOSSES.register_module()
 class ContrastiveCELoss(nn.Module):
-    """CrossEntropyLoss.
+    """ContrastiveCELoss.
 
     Args:
         use_sigmoid (bool, optional): Whether the prediction uses sigmoid
