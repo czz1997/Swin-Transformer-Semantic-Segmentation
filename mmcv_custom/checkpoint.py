@@ -323,6 +323,10 @@ def load_checkpoint(model,
     if sorted(list(state_dict.keys()))[0].startswith('encoder'):
         state_dict = {k.replace('encoder.', ''): v for k, v in state_dict.items() if k.startswith('encoder.')}
 
+    # for SimMIM pre-training
+    if 'simmim' in os.path.basename(filename):
+        state_dict = {k.replace('encoder.', ''): v for k, v in state_dict.items() if k.startswith('encoder.')}
+
     # reshape absolute position embedding
     if state_dict.get('absolute_pos_embed') is not None:
         absolute_pos_embed = state_dict['absolute_pos_embed']
