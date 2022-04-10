@@ -132,6 +132,36 @@ def main():
         train_cfg=cfg.get('train_cfg'),
         test_cfg=cfg.get('test_cfg'))
 
+    # debug
+    # unique_key_ls = []
+    # for key in list(model.state_dict().keys()):
+    #     if key.split('.')[0] not in unique_key_ls:
+    #         unique_key_ls.append(key.split('.')[0])
+    # debug
+
+    pretraining = False
+    legit_pretraining_keywords = ['simmim']
+    pretraining_keyword = None
+    for keyword in legit_pretraining_keywords:
+        if keyword in os.path.basename(cfg.model.pretrained):
+            pretraining = True
+            pretraining_keyword = keyword
+
+    if pretraining:
+        logger.info("Use pretrained model and freeze the encoder!")
+        _loaded_net_weight = torch.load(cfg.model.pretrained, map_location='cpu')
+        unfrozen_param_ls = []
+        for name, param in model.named_parameters():
+            # only freeze the backbone parameters that are really pre-trained
+            if 'backbone' == name.split('.')[0]:
+                if 'simmim' == pretraining_keyword:
+                    # pdb.set_trace()
+                    if name.replace('backbone', 'encoder') in _loaded_net_weight['model'].keys():
+                        param.requires_grad = False
+                    else:
+                        unfrozen_param_ls.append(name)
+                        pass
+        logger.info("The following parameters at the backbone module are not frozen: {:s}".format(', '.join(unfrozen_param_ls)))
     logger.info(model)
 
     datasets = [build_dataset(cfg.data.train)]
