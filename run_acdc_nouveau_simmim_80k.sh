@@ -15,7 +15,7 @@ echo $DATASET
 export EXP_NAME="ACDC_nouveau_$DATASET"
 export CONFIG_FILE="configs/swin/upernet_swin_small_patch4_window7_512x512_80k_$EXP_NAME.py"
 export PRETRAINED_MODEL_PATH="weights/simmim_swin_small_patch4_window7_448_${DATASET}.pth"
-export WORK_DIR="runs/${EXP_NAME}_adain_PT_simmim"
+export WORK_DIR="runs/${EXP_NAME}_adain_PT_simmim_free"
 export NUM_GPUS=2
 
 mkdir -p $WORK_DIR
