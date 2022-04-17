@@ -506,7 +506,8 @@ class SwinTransformer(nn.Module):
                  patch_norm=True,
                  out_indices=(0, 1, 2, 3),
                  frozen_stages=-1,
-                 use_checkpoint=False):
+                 use_checkpoint=False,
+                 allow_mix_style=False):
         super().__init__()
 
         self.pretrain_img_size = pretrain_img_size
@@ -553,7 +554,7 @@ class SwinTransformer(nn.Module):
                 norm_layer=norm_layer,
                 downsample=PatchMerging if (i_layer < self.num_layers - 1) else None,
                 use_checkpoint=use_checkpoint,
-                mix_style=True if i_layer in [1, 2] else False  # apply mix style to first two layers' output
+                mix_style=True if i_layer in [1, 2] and allow_mix_style else False  # apply mix style to first two layers' output
             )
             self.layers.append(layer)
 
