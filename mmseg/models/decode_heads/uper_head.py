@@ -144,5 +144,10 @@ class UPerHead(BaseDecodeHead):
         logits = self.cls_seg(output)  # [N, cls, H, W]
         if not self.training:
             return logits
-        embed = F.normalize(self.proj_head(output), p=2, dim=1)  # L2 normalized
-        return logits, embed
+        if 'crossentropyloss' in str(self.loss_decode).lower():
+            return logits
+        elif 'contrastiveceLoss' in str(self.loss_decode).lower():
+            embed = F.normalize(self.proj_head(output), p=2, dim=1)  # L2 normalized
+            return logits, embed
+        else:
+            raise NotImplementedError
