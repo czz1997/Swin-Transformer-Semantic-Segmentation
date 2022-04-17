@@ -1,17 +1,18 @@
 _base_ = [
-    '../_base_/models/upernet_swin.py', '../_base_/datasets/acdc_nouveau_snow.py',
+    '../_base_/models/upernet_swin_mixcon.py', '../_base_/datasets/acdc_nouveau_fog.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_80k.py'
 ]
 model = dict(
     backbone=dict(
         embed_dim=96,
-        depths=[2, 2, 18, 2],
+        depths=[2, 2, 6, 2],
         num_heads=[3, 6, 12, 24],
         window_size=7,
         ape=False,
         drop_path_rate=0.3,
         patch_norm=True,
-        use_checkpoint=False
+        use_checkpoint=False,
+        allow_mix_style=True
     ),
     decode_head=dict(
         in_channels=[96, 192, 384, 768],
