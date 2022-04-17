@@ -230,10 +230,19 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
         else:
             seg_weight = None
         seg_label = seg_label.squeeze(1)
-        loss['loss_seg'] = self.loss_decode(
-            (seg_logit, og_seg_logit, feat) if feat is not None else seg_logit,
-            seg_label,
-            weight=seg_weight,
-            ignore_index=self.ignore_index)
+        if 'crossentropyloss' in str(self.loss_decode).lower():
+            loss['loss_seg'] = self.loss_decode(
+                seg_logit,
+                seg_label,
+                weight=seg_weight,
+                ignore_index=self.ignore_index)
+        elif 'contrastiveceLoss' in str(self.loss_decode).lower():
+            loss['loss_seg'] = self.loss_decode(
+                (seg_logit, og_seg_logit, feat) if feat is not None else seg_logit,
+                seg_label,
+                weight=seg_weight,
+                ignore_index=self.ignore_index)
+        else:
+            raise NotImplementedError
         loss['acc_seg'] = accuracy(seg_logit, seg_label)
         return loss
