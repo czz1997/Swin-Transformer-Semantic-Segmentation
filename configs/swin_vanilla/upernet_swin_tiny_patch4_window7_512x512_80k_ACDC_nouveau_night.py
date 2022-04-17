@@ -11,7 +11,8 @@ model = dict(
         ape=False,
         drop_path_rate=0.3,
         patch_norm=True,
-        use_checkpoint=False
+        use_checkpoint=False,
+        allow_mix_style=False
     ),
     decode_head=dict(
         in_channels=[96, 192, 384, 768],
