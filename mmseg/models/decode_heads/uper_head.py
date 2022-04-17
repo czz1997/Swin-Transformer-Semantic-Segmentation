@@ -74,7 +74,10 @@ class UPerHead(BaseDecodeHead):
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
 
-        self.proj_head = nn.Sequential(
+        if 'crossentropyloss' in str(self.loss_decode).lower():
+            self.proj_head = nn.Identity()
+        elif 'contrastiveceLoss' in str(self.loss_decode).lower():
+            self.proj_head = nn.Sequential(
                 ConvModule(
                     self.channels,
                     self.channels,
@@ -91,6 +94,8 @@ class UPerHead(BaseDecodeHead):
                     act_cfg=None
                 )
             )
+        else:
+            raise NotImplementedError
 
     def psp_forward(self, inputs):
         """Forward function of PSP module."""
