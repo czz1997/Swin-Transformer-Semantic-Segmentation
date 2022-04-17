@@ -325,6 +325,7 @@ def load_checkpoint(model,
 
     # for SimMIM pre-training
     if 'simmim' in os.path.basename(filename):
+        raise NotImplementedError
         state_dict = {k.replace('encoder.', ''): v for k, v in state_dict.items() if k.startswith('encoder.')}
 
     # reshape absolute position embedding
