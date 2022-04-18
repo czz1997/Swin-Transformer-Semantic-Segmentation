@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -l walltime=36:00:00,select=1:ncpus=8:ngpus=4:mem=64gb:gpu_mem=32gb
+#PBS -N qi_yan_task
+#PBS -A st-rjliao-1-gpu
+#PBS -m abe
+#PBS -M yanq@student.ubc.ca
+ 
+################################################################################
+
+source ~/.bashrc
+module restore conda-gpu
+
+conda activate /home/yanq/.conda/envs/swin
+
+cd /home/yanq/scratch_rjliao/Swin-Transformer-Semantic-Segmentation
+
+
+# $DATASET must be "fog" "night" "rain" "snow"
+#DATASET=$1
+if [ -z "$DATASET" ]
+then
+  echo "DATASET is empty"
+  DATASET="fog"
+else
+  echo "DATASET is set"
+fi
+echo $DATASET
+
+# $BACKBONE must be "tiny" "small" "base"
+#BACKBONE=$2
+if [ -z "$BACKBONE" ]
+then
+  echo "BACKBONE is empty"
+  BACKBONE="small"
+else
+  echo "BACKBONE is set"
+fi
+echo $BACKBONE
+
+bash run_acdc_nouveau_simmim_mixcon_80k.sh $DATASET $BACKBONE
+
+
+
