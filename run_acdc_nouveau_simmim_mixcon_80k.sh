@@ -29,7 +29,7 @@ export CONFIG_FILE="configs/swin_mixcon/upernet_swin_${BACKBONE}_patch4_window7_
 # only base backbone pretrained weight is available
 export PRETRAINED_MODEL_PATH="weights/simmim_pretrain__swin_${BACKBONE}__img192_window6__800ep.pth"
 
-export WORK_DIR="runs/${EXP_NAME}_swinTF_${BACKBONE}_mixcon"
+export WORK_DIR="runs/${EXP_NAME}_swinTF_${BACKBONE}_simmim_mixcon"
 export NUM_GPUS=4
 
 mkdir -p $WORK_DIR
