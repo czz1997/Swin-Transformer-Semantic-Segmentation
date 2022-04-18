@@ -1,12 +1,12 @@
 _base_ = [
-    '../_base_/models/upernet_swin_mixcon.py', '../_base_/datasets/acdc_nouveau_night.py',
+    '../_base_/models/upernet_swin_mixcon.py', '../_base_/datasets/acdc_nouveau_rain.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_80k.py'
 ]
 model = dict(
     backbone=dict(
-        embed_dim=96,
+        embed_dim=128,
         depths=[2, 2, 18, 2],
-        num_heads=[3, 6, 12, 24],
+        num_heads=[4, 8, 16, 32],
         window_size=7,
         ape=False,
         drop_path_rate=0.3,
@@ -15,11 +15,11 @@ model = dict(
         allow_mix_style=True
     ),
     decode_head=dict(
-        in_channels=[96, 192, 384, 768],
+        in_channels=[128, 256, 512, 1024],
         num_classes=150
     ),
     auxiliary_head=dict(
-        in_channels=384,
+        in_channels=512,
         num_classes=150
     ))
 
@@ -36,4 +36,4 @@ lr_config = dict(_delete_=True, policy='poly',
                  power=1.0, min_lr=0.0, by_epoch=False)
 
 # By default, models are trained on 8 GPUs with 2 images per GPU
-data=dict(samples_per_gpu=5)
+data=dict(samples_per_gpu=4)
