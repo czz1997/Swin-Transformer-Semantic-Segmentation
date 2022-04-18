@@ -1,3 +1,5 @@
+import pdb
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -76,7 +78,7 @@ class UPerHead(BaseDecodeHead):
 
         if 'crossentropyloss' in str(self.loss_decode).lower():
             self.proj_head = nn.Identity()
-        elif 'contrastiveceLoss' in str(self.loss_decode).lower():
+        elif 'contrastiveceloss' in str(self.loss_decode).lower():
             self.proj_head = nn.Sequential(
                 ConvModule(
                     self.channels,
@@ -151,7 +153,7 @@ class UPerHead(BaseDecodeHead):
             return logits
         if 'crossentropyloss' in str(self.loss_decode).lower():
             return logits
-        elif 'contrastiveceLoss' in str(self.loss_decode).lower():
+        elif 'contrastiveceloss' in str(self.loss_decode).lower():
             embed = F.normalize(self.proj_head(output), p=2, dim=1)  # L2 normalized
             return logits, embed
         else:

@@ -236,7 +236,7 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
                 seg_label,
                 weight=seg_weight,
                 ignore_index=self.ignore_index)
-        elif 'contrastiveceLoss' in str(self.loss_decode).lower():
+        elif 'contrastiveceloss' in str(self.loss_decode).lower():
             loss['loss_seg'] = self.loss_decode(
                 (seg_logit, og_seg_logit, feat) if feat is not None else seg_logit,
                 seg_label,
